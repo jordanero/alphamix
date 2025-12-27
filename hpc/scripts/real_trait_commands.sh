@@ -1,5 +1,7 @@
 #!/bin/bash
+
 BASE_DIR=${BASE_DIR}
+
 # main real trait results
 #sbatch ${BASE_DIR}/scripts/run_ldsc_2/baselineLD2.2_plus_maf_grid/run_ldsc.sh
 #sbatch ${BASE_DIR}/scripts/run_ldsc_2/baselineLD2.2_plus_maf_grid/get_alpha_from_grid_w_unconstrained.sh
