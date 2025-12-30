@@ -33,6 +33,58 @@ BED_PREFIX=/n/groups/price/ldsc/reference_files/1000G_EUR_Phase3/plink_files/100
 
 mkdir -p ${RESULTS_DIR}
 
+##### step 1 combine all the seed specific plink files
+for SEED in $(seq ${FIRST_SEED} ${LAST_SEED}); do
+conda run -p /home/jor6523/rh9_envs/multisusie python -c \
+"import pandas as pd; import tqdm; 
+pd.concat(
+        [pd.read_csv(f'${SCRATCH_DIR}/chr{chr}.seed_${SEED}.glm.linear.zst', sep = '\t') for chr in tqdm.tqdm(range(1,23))]
+).assign(
+    ID = lambda x: x.ID.str.split('.', expand = True).iloc[:, 0]
+).to_csv(
+    '${SCRATCH_DIR}/seed_${SEED}.txt',
+    sep = '\t',
+    index = False
+)"
+done
+
+
+### step 2 munge the sumstats
+for SEED in $(seq ${FIRST_SEED} ${LAST_SEED}); do
+conda run -p /home/jor6523/.conda/envs/ldsc python \
+    /n/groups/price/jordan/pkgs/ldsc/munge_sumstats.py \
+    --sumstats ${SCRATCH_DIR}/seed_${SEED}.txt \
+    --out ${SCRATCH_DIR}/seed_${SEED}_munged \
+    --signed-sumstats T_STAT,0 \
+    --snp ID \
+    --N-col OBS_CT \
+    --a1 A1 \
+    --a2 REF \
+    --chunksize 500000 \
+    --merge-alleles /n/groups/price/ldsc/reference_files/w_hm3.snplist
+done
+
+
+for SEED in $(seq ${FIRST_SEED} ${LAST_SEED}); do
+    rm ${SCRATCH_DIR}/seed_${SEED}.txt
+done
+
+
+## step 3 run ldsc
+for SEED in $(seq ${FIRST_SEED} ${LAST_SEED}); do
+conda run -p /home/jor6523/.conda/envs/ldsc python \
+    ${LDSC_DIR}/ldsc.py \
+    --set-jk-seps-wo-filtering \
+    --h2 ${SCRATCH_DIR}/seed_${SEED}_munged.sumstats.gz \
+    --ref-ld-chr ${LDSCORE_PREFIX},${BASELINELD_PREFIX} \
+    --w-ld-chr ${WEIGHTS_PREFIX} \
+    --overlap-annot \
+    --frqfile-chr ${BED_PREFIX}. \
+    --print-coefficients \
+    --print-delete-vals \
+    --out ${RESULTS_DIR}/seed_${SEED}
+done
+
 
 ## step 4 estimate alpha mix parameters
 
