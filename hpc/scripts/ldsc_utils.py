@@ -3,7 +3,7 @@ import pandas as pd
 import tqdm
 
 BASE_DIR='/n/groups/price/jordan/h2xancestry'
-1KG_PLINK_DIR='/n/groups/price/ldsc/reference_files/1000G_EUR_Phase3/plink_files'
+KG_PLINK_DIR='/n/groups/price/ldsc/reference_files/1000G_EUR_Phase3/plink_files'
 UKB_PGEN_DIR='/n/groups/price/UKBiobank/UKB_pgen/highinfo_snps/MAFs'
 
 
@@ -641,7 +641,7 @@ def get_maf_df():
             sep = '\t'
         )
         eur_maf_chrom = pd.read_csv(
-            f'{1KG_PLINK_DIR}/1000G.EUR.QC.{chrom}.frq',
+            f'{KG_PLINK_DIR}/1000G.EUR.QC.{chrom}.frq',
             sep = '\\s+'
         ).rename(
             columns = {'MAF' : 'MAF_eur'}
@@ -777,7 +777,7 @@ def simulate_effects(sim_suffix: str, n_causal_variants: int = 10000, pmix_thres
             sep = '\t'
         )
         eur_maf_chrom = pd.read_csv(
-            f'{1KG_PLINK_DIR}/1000G.EUR.QC.{chrom}.frq',
+            f'{KG_PLINK_DIR}/1000G.EUR.QC.{chrom}.frq',
             sep = '\\s+'
         ).rename(
             columns = {'MAF' : 'MAF_eur'}
